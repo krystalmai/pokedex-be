@@ -31,7 +31,7 @@ router.get("/", (req, res, next) => {
     let offset = limit * (page - 1); // number of items to skip for selection
 
     // read data from db.json then parse t JS object
-    
+
     let { data } = readDatabase();
 
     // filter by name
@@ -49,8 +49,16 @@ router.get("/", (req, res, next) => {
       //filter by types
       if (filterKeys.includes("type")) {
         result = result.length
-          ? result.filter((pokemon) => pokemon.types.includes(filterQuery.type))
-          : data.filter((pokemon) => pokemon.types.includes(filterQuery.type));
+          ? result.filter((pokemon) =>
+              pokemon.types.some(
+                (el) => el.toLowerCase() === filterQuery.type.toLowerCase() // case insensitive search
+              )
+            )
+          : data.filter((pokemon) =>
+              pokemon.types.some(
+                (el) => el.toLowerCase() === filterQuery.type.toLowerCase()
+              )
+            );
       }
     } else {
       result = data;
@@ -71,7 +79,7 @@ router.get("/:id", (req, res, next) => {
     let { id } = req.params;
 
     // read data from db.json then parse t JS object
-   
+
     let { data, totalPokemons } = readDatabase();
 
     let index = data.indexOf(
@@ -117,7 +125,7 @@ router.get("/:id", (req, res, next) => {
 router.post("/", (req, res, next) => {
   try {
     // read data from db.json then parse t JS object
-   
+
     let { db, data, totalPokemons } = readDatabase();
 
     //input validation
@@ -202,9 +210,11 @@ router.put("/:id", (req, res, next) => {
 
     // processing
     // read data from db.json then parse t JS object
-    
+
     let { db, data } = readDatabase();
-    const targetIndex = data.findIndex((pokemon) => pokemon.id === parseInt(id));
+    const targetIndex = data.findIndex(
+      (pokemon) => pokemon.id === parseInt(id)
+    );
     if (targetIndex < 0) throwException(404, "Pokemon not found");
     const updatedPokemon = { ...data[targetIndex], ...updates };
     db.data[targetIndex] = updatedPokemon;
@@ -227,16 +237,18 @@ router.delete("/:id", (req, res, next) => {
     const { id } = req.params;
 
     let { db, data, totalPokemons } = readDatabase();
-    const targetIndex = data.findIndex((pokemon) => pokemon.id === parseInt(id));
-    if (targetIndex < 0) throwException(404, "Pokemon not found")
+    const targetIndex = data.findIndex(
+      (pokemon) => pokemon.id === parseInt(id)
+    );
+    if (targetIndex < 0) throwException(404, "Pokemon not found");
     db.data = data.filter((pokemon) => pokemon.id !== parseInt(id));
     db = JSON.stringify(db);
     fs.writeFileSync("db.json", db);
-    res.status(200).send({})
+    res.status(200).send({});
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 module.exports = router;
 
 const throwException = (code, message) => {
@@ -250,5 +262,5 @@ const readDatabase = () => {
   let db = fs.readFileSync("db.json", "utf-8");
   db = JSON.parse(db);
   const { data, totalPokemons } = db;
-  return {db, data, totalPokemons}
-}
+  return { db, data, totalPokemons };
+};

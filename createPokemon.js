@@ -27,4 +27,7 @@ const createPokemon = async () => {
   // write updated content into db.json
   fs.writeFileSync("db.json", JSON.stringify(data));
 };
+
+
 createPokemon();
+
