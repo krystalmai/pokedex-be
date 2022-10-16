@@ -2,13 +2,16 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 
+//READ
 /**
- * Get all pokemons
- * method: get
+ * @route GET /
+ * @description Get all pokemons
+ * @access public
+ * @parameters "page", "limit", "type", "search"
  */
 
 router.get("/", (req, res, next) => {
-  // 1.input validation
+  // 1. input validation
   const allowedQueries = ["page", "limit", "type", "search"];
   try {
     let { page, limit, ...filterQuery } = req.query;
@@ -30,7 +33,7 @@ router.get("/", (req, res, next) => {
 
     let offset = limit * (page - 1); // number of items to skip for selection
 
-    // read data from db.json then parse t JS object
+    // read data from db.json then parse to JS object
 
     let { data } = readDatabase();
 
@@ -71,8 +74,9 @@ router.get("/", (req, res, next) => {
 });
 
 /**
- * Get all a pokemon
- * method: get
+ * @route GET /:id
+ * @description Get a pokemon by id
+ * @access public
  */
 router.get("/:id", (req, res, next) => {
   try {
@@ -84,7 +88,7 @@ router.get("/:id", (req, res, next) => {
 
     let index = data.indexOf(
       data.find((pokemon) => pokemon.id === parseInt(id))
-    );
+    ); //find index
 
     let result;
 
@@ -118,9 +122,12 @@ router.get("/:id", (req, res, next) => {
   }
 });
 
+//CREATE
 /**
- * Create a pokemon
- * method: post
+ * @route POST /
+ * @description Create a pokemon
+ * @access public
+ * @body { name, id, types, url,}
  */
 router.post("/", (req, res, next) => {
   try {
@@ -191,9 +198,12 @@ router.post("/", (req, res, next) => {
   }
 });
 
+//UPDATE
 /**
- * Update a pokemon
- * method: put
+ * @route PUT /:id
+ * @description Update a pokemon info
+ * @access public
+ * @body { name,id, types, url,}
  */
 router.put("/:id", (req, res, next) => {
   try {
@@ -228,15 +238,18 @@ router.put("/:id", (req, res, next) => {
   }
 });
 
+//DELETE
 /**
- * Delete a pokemon
- * method delete
+ * @route DELETE /:id
+ * @description Delete a pokemon by id
+ * @access public
+
  */
 router.delete("/:id", (req, res, next) => {
   try {
     const { id } = req.params;
 
-    let { db, data, totalPokemons } = readDatabase();
+    let { db, data } = readDatabase();
     const targetIndex = data.findIndex(
       (pokemon) => pokemon.id === parseInt(id)
     );
@@ -251,6 +264,7 @@ router.delete("/:id", (req, res, next) => {
 });
 module.exports = router;
 
+//utilities
 const throwException = (code, message) => {
   const exception = new Error(message);
   exception.statusCode = code;
